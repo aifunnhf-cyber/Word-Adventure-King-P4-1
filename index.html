@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保良局何壽南小學 - 四年級中文字詞冒險王</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4;
+        }
+        .card-flip {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .bounce-animation {
+            animation: bounce 0.5s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-emerald-600 text-white shadow-lg p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-graduation-cap text-3xl text-yellow-300"></i>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold">字詞冒險王</h1>
+                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習</p>
+                </div>
+            </div>
+            <div id="stats-bar" class="hidden flex items-center space-x-4 bg-emerald-700 px-3 py-1.5 rounded-full text-sm font-semibold">
+                <span id="score-display" class="text-yellow-300"><i class="fa-solid fa-star mr-1"></i>0</span>
+                <span id="combo-display" class="text-orange-300"><i class="fa-solid fa-fire mr-1"></i>0 連擊</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto w-full p-4 flex-grow flex flex-col justify-center">
+
+        <!-- 1. Menu View -->
+        <div id="view-menu" class="space-y-6 text-center">
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-emerald-200">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-emerald-700 mb-2">歡迎來到字詞大冒險！</h2>
+                <p class="text-gray-600 mb-6">請選擇課文與遊戲模式開始練習：</p>
+
+                <!-- Unit & Lesson Selector -->
+                <div class="mb-6 text-left">
+                    <label class="block text-sm font-bold text-gray-700 mb-2"><i class="fa-solid fa-book text-emerald-600 mr-2"></i>選擇學習課文：</label>
+                    <select id="lesson-select" class="w-full p-3 border-2 border-emerald-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold text-gray-700 bg-emerald-50">
+                        <option value="ALL">🌟 全部課文綜合挑戰</option>
+                        <optgroup label="四上一冊">
+                            <option value="U1L1">單元一 第一課 《那一瞬》</option>
+                            <option value="U1L2">單元一 第二課 《掌聲》</option>
+                            <option value="U3L7">單元三 第七課 《白蝴蝶之戀》</option>
+                            <option value="U4L11">單元四 第十一課 《一「網」打盡》</option>
+                        </optgroup>
+                        <optgroup label="四上二冊">
+                            <option value="U5L15">單元五 第十五課 《盤古開天闢地》</option>
+                            <option value="U6L18">單元六 第十八課 《廬園勝景》</option>
+                            <option value="U7L21">單元七 第二十一課 《三字經——人之初》</option>
+                            <option value="U7L23">單元七 第二十三課 《弟子規——冬則溫》</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Game Mode Selector -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button onclick="startGame('fill')" class="group p-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl shadow-md transition transform hover:-translate-y-1 flex flex-col items-center">
+                        <i class="fa-solid fa-pen-to-square text-4xl mb-3 text-emerald-100 group-hover:scale-110 transition"></i>
+                        <span class="text-lg font-bold">句子填充王</span>
+                        <span class="text-xs text-emerald-100 mt-1">選出最合適的詞語填入句子</span>
+                    </button>
+
+                    <button onclick="startGame('choice')" class="group p-5 bg-teal-500 hover:bg-teal-600 text-white rounded-2xl shadow-md transition transform hover:-translate-y-1 flex flex-col items-center">
+                        <i class="fa-solid fa-list-check text-4xl mb-3 text-teal-100 group-hover:scale-110 transition"></i>
+                        <span class="text-lg font-bold">詞義大辨析</span>
+                        <span class="text-xs text-teal-100 mt-1">理解詞語意思，選出正確解釋</span>
+                    </button>
+
+                    <button onclick="startGame('match')" class="group p-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl shadow-md transition transform hover:-translate-y-1 flex flex-col items-center">
+                        <i class="fa-solid fa-puzzle-piece text-4xl mb-3 text-indigo-100 group-hover:scale-110 transition"></i>
+                        <span class="text-lg font-bold">詞卡配對賽</span>
+                        <span class="text-xs text-indigo-100 mt-1">翻開卡片配對詞語與解釋</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vocabulary Bank Reference -->
+            <div class="bg-white rounded-2xl p-4 shadow-md border border-gray-100 text-left">
+                <button onclick="toggleVocabList()" class="w-full flex justify-between items-center text-emerald-700 font-bold">
+                    <span><i class="fa-solid fa-book-open mr-2"></i>預習本課字詞庫</span>
+                    <i id="vocab-toggle-icon" class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div id="vocab-list-container" class="hidden mt-4 pt-3 border-t grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
+                    <!-- Dynamic Vocab Pills -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Game View -->
+        <div id="view-game" class="hidden space-y-4">
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+                <div id="progress-bar" class="bg-emerald-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <div id="game-card" class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-emerald-100 min-h-[350px] flex flex-col justify-between">
+                <!-- Question Area -->
+                <div id="question-area" class="space-y-4">
+                    <!-- Dynamic Question Header -->
+                </div>
+
+                <!-- Options / Match Grid Area -->
+                <div id="interactive-area" class="my-6">
+                    <!-- Dynamic Content -->
+                </div>
+
+                <!-- Footer Action / Speech -->
+                <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <button onclick="speakCurrentWord()" class="text-emerald-600 hover:text-emerald-800 font-semibold text-sm flex items-center bg-emerald-50 px-3 py-1.5 rounded-lg">
+                        <i class="fa-solid fa-volume-high mr-2"></i>發音（廣東話）
+                    </button>
+                    <button onclick="backToMenu()" class="text-gray-400 hover:text-gray-600 text-sm font-medium">
+                        <i class="fa-solid fa-house mr-1"></i>返回主選單
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Result View -->
+        <div id="view-result" class="hidden text-center space-y-6">
+            <div class="bg-white rounded-3xl p-8 shadow-2xl border-4 border-yellow-300">
+                <div class="inline-block p-4 bg-yellow-100 rounded-full text-yellow-500 text-5xl mb-4 bounce-animation">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-gray-800 mb-2">挑戰完成！</h2>
+                <p class="text-gray-600 text-lg mb-6">太棒了！你完成了本次的字詞訓練。</p>
+
+                <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-6">
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                        <div class="text-sm text-emerald-600 font-semibold">最終得分</div>
+                        <div id="final-score" class="text-3xl font-black text-emerald-700">0</div>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-2xl border border-orange-200">
+                        <div class="text-sm text-orange-600 font-semibold">最高連擊</div>
+                        <div id="final-combo" class="text-3xl font-black text-orange-600">0</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center space-x-4">
+                    <button onclick="restartGame()" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg transition">
+                        <i class="fa-solid fa-rotate-right mr-2"></i>再玩一次
+                    </button>
+                    <button onclick="backToMenu()" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition">
+                        <i class="fa-solid fa-list mr-2"></i>選擇其他模式
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-gray-400">
+        © 保良局何壽南小學 四年級字詞訓練小遊戲 | 適合廣東話語境教學
+    </footer>
+
+    <!-- Custom Modal Message -->
+    <div id="feedback-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl transform transition-all scale-95">
+            <div id="modal-icon" class="text-5xl mb-3"></div>
+            <h3 id="modal-title" class="text-xl font-bold mb-2"></h3>
+            <p id="modal-msg" class="text-sm text-gray-600 mb-6"></p>
+            <button onclick="closeModal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl">繼續下一題</button>
+        </div>
+    </div>
+
+    <!-- Game Logic JavaScript -->
+    <script>
+        // Full Word Database mapped from user provided photos
+        const wordData = [
+            // 四上一冊 第一課《那一瞬》
+            { word: "概括", lesson: "U1L1", pinyin: "gài kuò", def: "把客觀事物的共同特徵歸結在一起；總括。", sentence: "老師要求我們用幾句話＿＿這篇文章的大意。" },
+            { word: "沉默", lesson: "U1L1", pinyin: "chén mò", def: "不說話，不發出聲音。", sentence: "聽到這個壞消息，大家陷入了一陣＿＿。" },
+            { word: "組織", lesson: "U1L1", pinyin: "zǔ zhī", def: "安排、安排組合使成系統。", sentence: "同學們正在積極＿＿週末的野餐活動。" },
+            { word: "瞭望", lesson: "U1L1", pinyin: "liào wàng", def: "高處往遠處看。", sentence: "水手站在船頭的塔台上向遠處＿＿。" },
+            { word: "周圍", lesson: "U1L1", pinyin: "zhōu wéi", def: "環繞着某中心的部分或區域。", sentence: "學校＿＿種滿了四季常青的樹木。" },
+            { word: "勇氣", lesson: "U1L1", pinyin: "yǒng qì", def: "敢作敢爲的力量和氣魄。", sentence: "面對困難，我們要鼓起＿＿去克服它。" },
+            { word: "呼喚", lesson: "U1L1", pinyin: "hū huàn", def: "大聲叫喊。", sentence: "媽媽在門口＿＿孩子回家吃飯。" },
+            { word: "盼望", lesson: "U1L1", pinyin: "pàn wàng", def: "熱切地希望。", sentence: "大家都在熱切＿＿暑假的到來。" },
+            { word: "眼神", lesson: "U1L1", pinyin: "yǎn shén", def: "眼睛的神態。", sentence: "從他的＿＿中，可以看出他非常自信。" },
+            { word: "似乎", lesson: "U1L1", pinyin: "sì hū", def: "好像、彷彿。", sentence: "天邊烏雲密佈，＿＿快要下雨了。" },
+            { word: "響亮", lesson: "U1L1", pinyin: "xiǎng liàng", def: "聲音宏大高亢。", sentence: "校園裏響起了＿＿的國歌聲。" },
+            { word: "劇烈", lesson: "U1L1", pinyin: "jù liè", def: "猛烈、強烈。", sentence: "飯後不宜進行＿＿運動，以免影響消化。" },
+            { word: "瞬間", lesson: "U1L1", pinyin: "shùn jiān", def: "極短的時間；一眨眼。", sentence: "流星在夜空中劃過，＿＿就消失了。" },
+            { word: "束縛", lesson: "U1L1", pinyin: "shù fù", def: "限制、約束使不自由。", sentence: "我們不應被舊有的思想＿＿住。" },
+            { word: "證明", lesson: "U1L1", pinyin: "zhèng míng", def: "用可靠的事實來表明真偽或對錯。", sentence: "這項實驗結果＿＿了他的推測是正確的。" },
+
+            // 第一單元 第二課《掌聲》
+            { word: "遮掩", lesson: "U1L2", pinyin: "zhē yǎn", def: "掩蓋；遮蔽。", sentence: "她用手帕＿＿住臉龐，不好意思地笑了。" },
+            { word: "煩惱", lesson: "U1L2", pinyin: "fán nǎo", def: "煩躁苦惱。", sentence: "遇到＿＿時，可以向朋友傾訴。" },
+            { word: "彷彿", lesson: "U1L2", pinyin: "fǎng fú", def: "好像、似乎。", sentence: "這幅畫畫得十分逼真，裡面的小鳥＿＿在唱歌。" },
+            { word: "吩咐", lesson: "U1L2", pinyin: "fēn fù", def: "口頭指派或囑咐。", sentence: "老師＿＿我們放學後要早點回家。" },
+            { word: "輪流", lesson: "U1L2", pinyin: "lún liú", def: "依照次序一個接替一個。", sentence: "值日生每天＿＿負責打掃教室衛生。" },
+            { word: "分享", lesson: "U1L2", pinyin: "fēn xiǎng", def: "和他人共同享受。", sentence: "好朋友應該懂得＿＿快樂與不快。" },
+            { word: "鼓勵", lesson: "U1L2", pinyin: "gǔ lì", def: "激發、勉勵。", sentence: "在老師的＿＿下，他終於克服了膽怯。" },
+            { word: "慢吞吞", lesson: "U1L2", pinyin: "màn tūn tūn", def: "形容動作或說話極為緩慢。", sentence: "他做事情總是＿＿的，真讓人著急。" },
+            { word: "視線", lesson: "U1L2", pinyin: "shì xiàn", def: "眼睛看東西時的眼光方向。", sentence: "大家的＿＿都集中在台上的表演者身上。" },
+            { word: "講述", lesson: "U1L2", pinyin: "jiǎng shù", def: "把事情的經過說出來。", sentence: "爺爺正在給我們＿＿他年輕時的故事。" },
+            { word: "鞠躬", lesson: "U1L2", pinyin: "jū gōng", def: "彎腰行禮。", sentence: "演員向觀眾深深地＿＿致謝。" },
+            { word: "脫胎換骨", lesson: "U1L2", pinyin: "tuō tāi huàn gǔ", def: "比喻徹底改變、煥然一新。", sentence: "經過幾年的刻苦訓練，他簡直＿＿了。" },
+            { word: "憂鬱", lesson: "U1L2", pinyin: "yōu yù", def: "愁悶、不快活。", sentence: "聽了這首抒情音樂，他臉上泛起一絲＿＿。" },
+            { word: "介意", lesson: "U1L2", pinyin: "jiè yì", def: "在意、放在心上。", sentence: "請不要＿＿，他只是無心之失。" },
+            { word: "燦爛", lesson: "U1L2", pinyin: "càn làn", def: "光彩耀眼、明亮華麗。", sentence: "太陽升起來了，綻放出＿＿的光芒。" },
+
+            // 第三單元 第七課《白蝴蝶之戀》
+            { word: "顫動", lesson: "U3L7", pinyin: "chàn dòng", def: "微弱地抖動。", sentence: "微風吹過，樹葉輕輕地＿＿起來。" },
+            { word: "奄奄一息", lesson: "U3L7", pinyin: "yǎn yǎn yī xī", def: "形容氣息微弱，瀕臨死亡。", sentence: "受傷的小鳥躺在地上，已經＿＿。" },
+            { word: "小心翼翼", lesson: "U3L7", pinyin: "xiǎo xīn yì yì", def: "非常謹慎小心，不敢疏忽。", sentence: "他＿＿地捧着水晶杯，生怕摔碎了。" },
+            { word: "動彈", lesson: "U3L7", pinyin: "dòng tan", def: "活動體態；移動。", sentence: "公車上擠滿了人，讓人無法＿＿。" },
+            { word: "歪倒", lesson: "U3L7", pinyin: "wāi dǎo", def: "傾斜倒下。", sentence: "大風過後，路邊的籬笆＿＿了一片。" },
+            { word: "蘇醒", lesson: "U3L7", pinyin: "sū xǐng", def: "昏迷後醒過來，或萬物恢復生機。", sentence: "春天來了，大地漸漸從寒冬中＿＿。" },
+            { word: "白茸茸", lesson: "U3L7", pinyin: "bái róng róng", def: "形容白色且柔軟細密的毛髮。", sentence: "這隻小兔子長着一身＿＿的毛，真可愛。" },
+            { word: "伸展", lesson: "U3L7", pinyin: "shēn zhǎn", def: "張開、擴展。", sentence: "早晨起床後，他做了一下＿＿運動。" },
+            { word: "黑漆漆", lesson: "U3L7", pinyin: "hēi qī qī", def: "形容非常黑。", sentence: "停電了，房間裏頓時變得＿＿的。" },
+            { word: "無限", lesson: "U3L7", pinyin: "wú xiàn", def: "沒有邊際或限度。", sentence: "宇宙非常廣闊，蘊含着＿＿的奧秘。" },
+            { word: "喜悅", lesson: "U3L7", pinyin: "xǐ yuè", def: "歡喜快樂。", sentence: "收到獲獎通知，他的心中充滿了＿＿。" },
+            { word: "光輝", lesson: "U3L7", pinyin: "guāng huī", def: "光明、光彩。", sentence: "夕陽的＿＿照亮了整個山頭。" },
+            { word: "盛滿", lesson: "U3L7", pinyin: "chéng mǎn", def: "裝得滿滿的。", sentence: "碗裏＿＿了香噴噴的白米飯。" },
+            { word: "飛翔", lesson: "U3L7", pinyin: "fēi xiáng", def: "盤旋地飛。", sentence: "雄鷹在遼闊的天空中自由地＿＿。" },
+            { word: "伶俐", lesson: "U3L7", pinyin: "líng lì", def: "聰明機靈、反應敏捷。", sentence: "這孩子口齒＿＿，非常討人喜歡。" },
+
+            // 第四單元 第十一課《一「網」打盡》
+            { word: "互聯網", lesson: "U4L11", pinyin: "hù lián wǎng", def: "全球性的電腦資訊網絡。", sentence: "現代人常常透過＿＿獲取世界各地的資訊。" },
+            { word: "鏡頭", lesson: "U4L11", pinyin: "jìng tóu", def: "攝影機或照相機的光學透鏡。", sentence: "攝影師正把＿＿對準遠處的花朵。" },
+            { word: "限制", lesson: "U4L11", pinyin: "xiàn zhì", def: "設定範圍不使超過。", sentence: "圖書館內＿＿保持安靜，不可大聲喧嘩。" },
+            { word: "溝通", lesson: "U4L11", pinyin: "gōu tōng", def: "交流思想或訊息。", sentence: "良好的＿＿有助於化解人與人之間的誤會。" },
+            { word: "規劃", lesson: "U4L11", pinyin: "guī huà", def: "籌劃、謀劃。", sentence: "我們應該妥善＿＿自己的學習時間。" },
+            { word: "瀏覽", lesson: "U4L11", pinyin: "liú lǎn", def: "大略地看。", sentence: "他習慣在早餐時＿＿新聞網頁。" },
+            { word: "模式", lesson: "U4L11", pinyin: "mó shì", def: "標準樣式或固定做法。", sentence: "這家公司採用了全新的管理＿＿。" },
+            { word: "資料", lesson: "U4L11", pinyin: "zī liào", def: "用作參考或研究材料。", sentence: "為了完成專題報告，我在網上查閱了不少＿＿。" },
+            { word: "資訊", lesson: "U4L11", pinyin: "zī xùn", def: "消息、數據與情報。", sentence: "這個網站提供最新、最準確的旅遊＿＿。" },
+            { word: "翻譯", lesson: "U4L11", pinyin: "fān yì", def: "將一種語言轉換成另一種語言。", sentence: "他將這本英文小說＿＿成了中文。" },
+            { word: "障礙", lesson: "U4L11", pinyin: "zhàng ài", def: "阻擋進展的物體或因素。", sentence: "只要我們團結一致，就能克服一切＿＿。" },
+            { word: "研究", lesson: "U4L11", pinyin: "yán jiū", def: "深入探求事物的本質。", sentence: "科學家們正在專心＿＿解決污染問題的方法。" },
+            { word: "覆蓋", lesson: "U4L11", pinyin: "fù gài", def: "遮蓋在上面。", sentence: "大雪過後，大地被一層厚厚的積雪＿＿。" },
+            { word: "擴闊", lesson: "U4L11", pinyin: "kuò kuò", def: "使範圍或視野變大。", sentence: "多讀書可以＿＿我們的視野與知識面。" },
+            { word: "視野", lesson: "U4L11", pinyin: "shì yě", def: "眼睛看到的範圍，比喻見識。", sentence: "出外旅行能開闊我們的＿＿。" },
+
+            // 第五單元 第十五課《盤古開天闢地》
+            { word: "混沌", lesson: "U5L15", pinyin: "hùn dùn", def: "天地未開前模糊一片的狀態。", sentence: "傳說在很久以前，宇宙還是一片＿＿。" },
+            { word: "沉睡", lesson: "U5L15", pinyin: "chén shuì", def: "熟睡、睡得非常甜。", sentence: "深夜裡，整個村莊都進入了＿＿。" },
+            { word: "黑暗", lesson: "U5L15", pinyin: "hēi àn", def: "沒有光亮。", sentence: "山洞裏一片＿＿，什麼也看不清。" },
+            { word: "劈", lesson: "U5L15", pinyin: "pī", def: "用斧頭等破開。", sentence: "盤古用大斧頭把混沌一斧＿＿開。" },
+            { word: "緩緩", lesson: "U5L15", pinyin: "huǎn huǎn", def: "慢慢地。", sentence: "熱氣球＿＿升上了天空。" },
+            { word: "濁", lesson: "U5L15", pinyin: "zhuó", def: "水不清澈；混濁。", sentence: "清的氣上升變成了天，＿＿的氣下降變成了地。" },
+            { word: "血液", lesson: "U5L15", pinyin: "xuè yè", def: "體內循環流動的紅色液體。", sentence: "心臟負責把＿＿輸送到全身各個部位。" },
+            { word: "奔流不息", lesson: "U5L15", pinyin: "bēn liú bù xī", def: "水流急促地奔跑，永不停歇。", sentence: "長江黃河水＿＿，滋養着大地。" },
+            { word: "茂盛", lesson: "U5L15", pinyin: "mào shèng", def: "植物生長得繁密好旺。", sentence: "森林裏長滿了＿＿的花草樹木。" },
+            { word: "滋潤", lesson: "U5L15", pinyin: "zī rùn", def: "增添水分使不乾枯。", sentence: "春雨＿＿着漸漸甦醒的花草。" },
+            { word: "祖宗", lesson: "U5L15", pinyin: "zǔ zōng", def: "家族的先祖。", sentence: "我們應該尊重＿＿留下來的優秀文化傳統。" },
+            { word: "身軀", lesson: "U5L15", pinyin: "shēn qū", def: "身體；軀幹。", sentence: "盤古用龐大的＿＿頂住了天地。" },
+            { word: "開闢", lesson: "U5L15", pinyin: "kāi pì", def: "打通、開創。", sentence: "農夫們辛勤工作，＿＿出片片肥沃的農田。" },
+            { word: "創造", lesson: "U5L15", pinyin: "chuàng zào", def: "做出前所未有的成果。", sentence: "勞動人民用智慧＿＿了偉大的奇蹟。" },
+            { word: "萬物", lesson: "U5L15", pinyin: "wàn wù", def: "宇宙間的一切事物。", sentence: "太陽的光輝照耀着世間＿＿。" },
+
+            // 第六單元 第十八課《廬園勝景》
+            { word: "煩囂", lesson: "U6L18", pinyin: "fán xiāo", def: "熱鬧吵雜。", sentence: "假期時，許多人喜歡離開＿＿的城市去郊遊。" },
+            { word: "恬靜", lesson: "U6L18", pinyin: "tián jìng", def: "安靜優雅、寧靜。", sentence: "這座小山村環境＿＿，空氣十分清新。" },
+            { word: "眼簾", lesson: "U6L18", pinyin: "yǎn lián", def: "眼皮，指視野之內。", sentence: "一打開窗戶，美麗的風景立刻映入＿＿。" },
+            { word: "迂迴", lesson: "U6L18", pinyin: "yū huí", def: "曲折迴旋。", sentence: "山路＿＿曲折，汽車小心地前行着。" },
+            { word: "美不勝收", lesson: "U6L18", pinyin: "měi bù shèng shōu", def: "美好的景色太多，來不及欣賞。", sentence: "公園裏的花朵盛開，景色精彩，真是＿＿。" },
+            { word: "景致", lesson: "U6L18", pinyin: "jǐng zhì", def: "風景、景色。", sentence: "這裡湖光山色，＿＿十分迷人。" },
+            { word: "幽雅", lesson: "U6L18", pinyin: "yōu yǎ", def: "幽靜而典雅。", sentence: "這間茶館環境＿＿，是個休息的好地方。" },
+            { word: "嬉戲", lesson: "U6L18", pinyin: "xī xì", def: "遊戲玩耍。", sentence: "小朋友們在公園的草地上歡快地＿＿。" },
+            { word: "結伴", lesson: "U6L18", pinyin: "jié bàn", def: "互相結成同伴。", sentence: "放學後，同學們＿＿一起回家。" },
+            { word: "閒適", lesson: "U6L18", pinyin: "xián shì", def: "清閒安適。", sentence: "老人坐在樹下品茶，過着＿＿的生活。" },
+            { word: "心曠神怡", lesson: "U6L18", pinyin: "xīn kuàng shén yí", def: "心胸開闊，精神愉悅。", sentence: "站在山頂遠眺，清風吹拂，令人＿＿。" },
+            { word: "名副其實", lesson: "U6L18", pinyin: "míng fù qí shí", def: "名稱或名聲與實際相符。", sentence: "他做事認真負責，是一位＿＿的好班長。" },
+            { word: "典雅", lesson: "U6L18", pinyin: "diǎn yǎ", def: "優雅高雅、符合規範。", sentence: "這間房間佈置得十分簡潔＿＿。" },
+            { word: "舒暢", lesson: "U6L18", pinyin: "shū chàng", def: "心情舒服暢快。", sentence: "呼吸着戶外的新鮮空氣，讓人心情＿＿。" },
+            { word: "陶醉", lesson: "U6L18", pinyin: "táo zuì", def: "沉浸在美的享受中。", sentence: "大家都＿＿在他那優美的歌聲中。" },
+
+            // 第七單元 第二十一課《三字經——人之初》
+            { word: "本性", lesson: "U7L21", pinyin: "běn xìng", def: "天生具有的性質。", sentence: "人之初，＿＿本善。" },
+            { word: "善良", lesson: "U7L21", pinyin: "shàn liáng", def: "心地純潔美好，富有同情心。", sentence: "她是一個心地＿＿的好姑娘。" },
+            { word: "彼此", lesson: "U7L21", pinyin: "bǐ cǐ", def: "雙方、互相。", sentence: "同學之間應該互相幫助，＿＿關心。" },
+            { word: "性格", lesson: "U7L21", pinyin: "xìng gé", def: "人的性情脾氣。", sentence: "他的＿＿非常開朗，很容易與人相處。" },
+            { word: "一心一意", lesson: "U7L21", pinyin: "yī xīn yī yì", def: "心思專一，毫無雜念。", sentence: "做事要＿＿，才能把事情做好。" },
+
+            // 第七單元 第二十三課《弟子規——冬則溫》
+            { word: "感覺", lesson: "U7L23", pinyin: "gǎn jué", def: "器官對客觀事物的反應，或心中感受。", sentence: "洗完熱水澡後，我覺得＿＿非常舒服。" },
+            { word: "悶熱", lesson: "U7L23", pinyin: "mēn rè", def: "天氣氣溫高，空氣不流通。", sentence: "夏天下雨前，天氣總是特別＿＿。" },
+            { word: "涼快", lesson: "U7L23", pinyin: "liáng kuai", def: "清涼舒適。", sentence: "樹蔭下非常＿＿，是消暑的好地方。" },
+            { word: "安心", lesson: "U7L23", pinyin: "ān xīn", def: "心情安定，沒有顧慮。", sentence: "看到孩子平安無事，媽媽終於＿＿了。" }
+        ];
+
+        // State Variables
+        let currentMode = '';
+        let filteredWords = [];
+        let currentGameIndex = 0;
+        let score = 0;
+        let combo = 0;
+        let maxCombo = 0;
+        let matchCards = [];
+        let selectedMatchCards = [];
+
+        // UI View Switcher
+        function showView(viewId) {
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-game').classList.add('hidden');
+            document.getElementById('view-result').classList.add('hidden');
+            document.getElementById(viewId).classList.remove('hidden');
+
+            const statsBar = document.getElementById('stats-bar');
+            if (viewId === 'view-game') {
+                statsBar.classList.remove('hidden');
+            } else if (viewId === 'view-menu') {
+                statsBar.classList.add('hidden');
+                updateVocabPreview();
+            }
+        }
+
+        // Toggle Word Preview Dropdown
+        function toggleVocabList() {
+            const container = document.getElementById('vocab-list-container');
+            const icon = document.getElementById('vocab-toggle-icon');
+            container.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+            updateVocabPreview();
+        }
+
+        function updateVocabPreview() {
+            const lessonSelect = document.getElementById('lesson-select').value;
+            const container = document.getElementById('vocab-list-container');
+            const list = lessonSelect === 'ALL' 
+                ? wordData 
+                : wordData.filter(w => w.lesson === lessonSelect);
+
+            container.innerHTML = list.map(w => `
+                <div class="p-2 bg-emerald-50 rounded-lg text-center border border-emerald-100 cursor-pointer hover:bg-emerald-100" onclick="speakText('${w.word}')">
+                    <div class="font-bold text-emerald-800">${w.word}</div>
+                    <div class="text-[10px] text-emerald-600">${w.pinyin}</div>
+                </div>
+            `).join('');
+        }
+
+        // Filter words based on dropdown selection
+        function getSelectedWords() {
+            const lesson = document.getElementById('lesson-select').value;
+            if (lesson === 'ALL') {
+                return [...wordData].sort(() => 0.5 - Math.random());
+            } else {
+                return wordData.filter(w => w.lesson === lesson).sort(() => 0.5 - Math.random());
+            }
+        }
+
+        // Start Game Engine
+        function startGame(mode) {
+            currentMode = mode;
+            filteredWords = getSelectedWords();
+            
+            if (filteredWords.length < 4) {
+                alert("該課文詞語數量較少，建議選擇『全部課文綜合挑戰』進行遊戲！");
+                return;
+            }
+
+            currentGameIndex = 0;
+            score = 0;
+            combo = 0;
+            maxCombo = 0;
+            updateStats();
+            showView('view-game');
+            loadQuestion();
+        }
+
+        function updateStats() {
+            document.getElementById('score-display').innerHTML = `<i class="fa-solid fa-star mr-1"></i>${score}`;
+            document.getElementById('combo-display').innerHTML = `<i class="fa-solid fa-fire mr-1"></i>${combo} 連擊`;
+            
+            const progress = (currentGameIndex / Math.min(filteredWords.length, 10)) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        // Load Question Logic
+        function loadQuestion() {
+            const totalQuestions = Math.min(filteredWords.length, 10);
+            if (currentGameIndex >= totalQuestions) {
+                endGame();
+                return;
+            }
+
+            updateStats();
+            const currentItem = filteredWords[currentGameIndex];
+            const qArea = document.getElementById('question-area');
+            const iArea = document.getElementById('interactive-area');
+
+            if (currentMode === 'fill') {
+                // Fill in the blank
+                const sentenceMasked = currentItem.sentence.replace('＿＿', '<span class="underline underline-offset-8 decoration-4 decoration-emerald-500 font-bold px-2 text-emerald-700">（ ？ ）</span>');
+                qArea.innerHTML = `
+                    <div class="text-xs font-semibold text-emerald-600 tracking-wider">第 ${currentGameIndex + 1} / ${totalQuestions} 題 • 句子填充</div>
+                    <h3 class="text-xl md:text-2xl font-medium leading-relaxed text-gray-800">${sentenceMasked}</h3>
+                `;
+
+                // Options (1 correct + 3 distractor)
+                const options = generateOptions(currentItem.word);
+                iArea.innerHTML = `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        ${options.map(opt => `
+                            <button onclick="checkAnswer('${opt}', '${currentItem.word}')" class="p-4 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 hover:border-emerald-400 rounded-2xl text-lg font-bold text-emerald-900 transition flex items-center justify-between">
+                                <span>${opt}</span>
+                                <i class="fa-regular fa-circle-check text-emerald-400"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (currentMode === 'choice') {
+                // Definition Choice
+                qArea.innerHTML = `
+                    <div class="text-xs font-semibold text-teal-600 tracking-wider">第 ${currentGameIndex + 1} / ${totalQuestions} 題 • 詞義理解</div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-3xl font-extrabold text-teal-700">${currentItem.word}</span>
+                        <span class="text-sm bg-teal-100 text-teal-800 px-2.5 py-1 rounded-full">${currentItem.pinyin}</span>
+                    </div>
+                    <p class="text-gray-600">請選出上述詞語的正確解釋：</p>
+                `;
+
+                const options = generateDefOptions(currentItem);
+                iArea.innerHTML = `
+                    <div class="space-y-3">
+                        ${options.map(opt => `
+                            <button onclick="checkAnswer('${opt.def}', '${currentItem.def}')" class="w-full text-left p-4 bg-teal-50 hover:bg-teal-100 border-2 border-teal-200 hover:border-teal-400 rounded-2xl text-md font-medium text-teal-950 transition">
+                                ${opt.def}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (currentMode === 'match') {
+                // Card Match Game (4 pairs per round)
+                qArea.innerHTML = `
+                    <div class="text-xs font-semibold text-indigo-600 tracking-wider">第 ${currentGameIndex + 1} / ${totalQuestions} 題 • 詞語連線配對</div>
+                    <h3 class="text-lg font-bold text-gray-700">翻開卡片，找出配對的詞語與解釋：</h3>
+                `;
+
+                setupMatchRound();
+            }
+        }
+
+        // Option Generators
+        function generateOptions(correctWord) {
+            const distractors = wordData
+                .filter(w => w.word !== correctWord)
+                .map(w => w.word)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 3);
+            return [correctWord, ...distractors].sort(() => 0.5 - Math.random());
+        }
+
+        function generateDefOptions(correctItem) {
+            const distractors = wordData
+                .filter(w => w.word !== correctItem.word)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 3);
+            return [correctItem, ...distractors].sort(() => 0.5 - Math.random());
+        }
+
+        // Matching Game Setup
+        function setupMatchRound() {
+            const roundWords = filteredWords.slice(currentGameIndex, currentGameIndex + 3);
+            let cards = [];
+            roundWords.forEach((w, idx) => {
+                cards.push({ id: idx, type: 'word', text: w.word, pairId: idx });
+                cards.push({ id: idx, type: 'def', text: w.def, pairId: idx });
+            });
+            matchCards = cards.sort(() => 0.5 - Math.random());
+            selectedMatchCards = [];
+
+            const iArea = document.getElementById('interactive-area');
+            iArea.innerHTML = `
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    ${matchCards.map((card, idx) => `
+                        <div id="match-card-${idx}" onclick="handleMatchSelect(${idx})" class="h-24 bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 rounded-xl p-3 flex items-center justify-center text-center cursor-pointer transition transform hover:scale-105 font-bold text-indigo-900 text-sm shadow-sm">
+                            ${card.text}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function handleMatchSelect(idx) {
+            const cardEl = document.getElementById(`match-card-${idx}`);
+            if (cardEl.classList.contains('bg-emerald-200') || selectedMatchCards.includes(idx)) return;
+
+            cardEl.classList.add('border-indigo-600', 'bg-indigo-200');
+            selectedMatchCards.push(idx);
+
+            if (selectedMatchCards.length === 2) {
+                const first = matchCards[selectedMatchCards[0]];
+                const second = matchCards[selectedMatchCards[1]];
+
+                if (first.pairId === second.pairId && first.type !== second.type) {
+                    // Match Success
+                    score += 20;
+                    combo++;
+                    if (combo > maxCombo) maxCombo = combo;
+                    
+                    document.getElementById(`match-card-${selectedMatchCards[0]}`).className = "h-24 bg-emerald-200 border-2 border-emerald-500 rounded-xl p-3 flex items-center justify-center text-center font-bold text-emerald-900 text-sm shadow-inner pointer-events-none";
+                    document.getElementById(`match-card-${selectedMatchCards[1]}`).className = "h-24 bg-emerald-200 border-2 border-emerald-500 rounded-xl p-3 flex items-center justify-center text-center font-bold text-emerald-900 text-sm shadow-inner pointer-events-none";
+
+                    selectedMatchCards = [];
+                    updateStats();
+
+                    // Check if all matched
+                    const matchedCount = document.querySelectorAll('.pointer-events-none').length;
+                    if (matchedCount === matchCards.length) {
+                        setTimeout(() => {
+                            currentGameIndex += 3;
+                            loadQuestion();
+                        }, 800);
+                    }
+                } else {
+                    // Match Failed
+                    combo = 0;
+                    updateStats();
+                    setTimeout(() => {
+                        selectedMatchCards.forEach(i => {
+                            const el = document.getElementById(`match-card-${i}`);
+                            if (el) el.className = "h-24 bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 rounded-xl p-3 flex items-center justify-center text-center cursor-pointer transition transform hover:scale-105 font-bold text-indigo-900 text-sm shadow-sm";
+                        });
+                        selectedMatchCards = [];
+                    }, 600);
+                }
+            }
+        }
+
+        // Answer Checking
+        function checkAnswer(selected, correct) {
+            if (selected === correct) {
+                score += 10 + combo * 2;
+                combo++;
+                if (combo > maxCombo) maxCombo = combo;
+                showModal(true, "答對了！太厲害了！", `詞語：<b>${filteredWords[currentGameIndex].word}</b><br>${filteredWords[currentGameIndex].def}`);
+            } else {
+                combo = 0;
+                showModal(false, "差一點點！再接再厲！", `正確答案是：<b>${correct}</b>`);
+            }
+            updateStats();
+        }
+
+        // Speech Synthesis (廣東話)
+        function speakCurrentWord() {
+            const currentItem = filteredWords[currentGameIndex];
+            if (currentItem) {
+                speakText(currentItem.word);
+            }
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-HK'; // 廣東話
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("你的瀏覽器暫時不支援語音播放。");
+            }
+        }
+
+        // Modal Control
+        function showModal(isCorrect, title, msg) {
+            const modal = document.getElementById('feedback-modal');
+            const icon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMsg = document.getElementById('modal-msg');
+
+            if (isCorrect) {
+                icon.innerHTML = '🎉';
+                modalTitle.className = 'text-xl font-bold mb-2 text-emerald-600';
+            } else {
+                icon.innerHTML = '💡';
+                modalTitle.className = 'text-xl font-bold mb-2 text-orange-500';
+            }
+
+            modalTitle.innerText = title;
+            modalMsg.innerHTML = msg;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+            currentGameIndex++;
+            loadQuestion();
+        }
+
+        // End Game
+        function endGame() {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-combo').innerText = maxCombo;
+            showView('view-result');
+            
+            // Celebration Confetti
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function restartGame() {
+            startGame(currentMode);
+        }
+
+        function backToMenu() {
+            showView('view-menu');
+        }
+
+        // Initialize App
+        window.onload = function() {
+            updateVocabPreview();
+        };
+    </script>
+</body>
+</html>
