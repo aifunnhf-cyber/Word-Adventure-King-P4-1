@@ -67,7 +67,7 @@
                 <i class="fa-solid fa-graduation-cap text-3xl text-yellow-300"></i>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold">字詞冒險王</h1>
-                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習 1 V2.04</p>
+                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習 1 V2.06</p>
                 </div>
             </div>
             <div id="stats-bar" class="hidden flex items-center space-x-4 bg-emerald-700 px-3 py-1.5 rounded-full text-sm font-semibold">
@@ -181,31 +181,53 @@
         </div>
 
         <!-- 3. Result View -->
+        <!-- Unified Result View with Top 10 Leaderboard -->
         <div id="view-result" class="hidden text-center space-y-6">
-            <div class="bg-white rounded-3xl p-8 shadow-2xl border-4 border-yellow-300">
-                <div class="inline-block p-4 bg-yellow-100 rounded-full text-yellow-500 text-5xl mb-4 bounce-animation">
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-yellow-300 max-w-xl mx-auto">
+                <div class="inline-block p-4 bg-yellow-100 rounded-full text-yellow-500 text-5xl mb-3 bounce-animation">
                     <i class="fa-solid fa-trophy"></i>
                 </div>
                 <h2 class="text-3xl font-extrabold text-gray-800 mb-2">挑戰完成！</h2>
-                <p class="text-gray-600 text-lg mb-6">太棒了！你完成了本次的字詞訓練。</p>
-
+                <p class="text-gray-600 text-sm mb-6">太棒了！你完成了本次的字詞訓練。</p>
+        
                 <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-6">
                     <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
-                        <div class="text-sm text-emerald-600 font-semibold">最終得分</div>
+                        <div class="text-xs text-emerald-600 font-semibold">最終得分</div>
                         <div id="final-score" class="text-3xl font-black text-emerald-700">0</div>
                     </div>
                     <div class="bg-orange-50 p-4 rounded-2xl border border-orange-200">
-                        <div class="text-sm text-orange-600 font-semibold">最高連擊</div>
+                        <div class="text-xs text-orange-600 font-semibold">最高連擊</div>
                         <div id="final-combo" class="text-3xl font-black text-orange-600">0</div>
                     </div>
                 </div>
-
-                <div class="flex justify-center space-x-4">
-                    <button onclick="restartGame()" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg transition">
-                        <i class="fa-solid fa-rotate-right mr-2"></i>再玩一次
+        
+                <!-- Leaderboard Table -->
+                <div class="bg-emerald-50/50 rounded-2xl p-4 border border-emerald-100 mb-6">
+                    <h3 class="text-md font-bold text-emerald-800 mb-3 flex items-center justify-center">
+                        <i class="fa-solid fa-ranking-star text-yellow-500 mr-2"></i>前 10 名排行榜 (Top 10)
+                    </h3>
+                    <div class="overflow-hidden rounded-xl border border-emerald-200 bg-white shadow-sm">
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-emerald-800 uppercase bg-emerald-100 border-b border-emerald-200">
+                                <tr>
+                                    <th class="px-4 py-2 text-center">排名</th>
+                                    <th class="px-4 py-2">玩家名稱</th>
+                                    <th class="px-4 py-2 text-right">得分</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body" class="divide-y divide-gray-100 font-medium">
+                                <!-- Dynamic rows inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+        
+                <div class="flex justify-center space-x-3">
+                    <button onclick="restartGame()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-md transition text-sm">
+                        <i class="fa-solid fa-rotate-right mr-1"></i>再玩一次
                     </button>
-                    <button onclick="backToMenu()" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition">
-                        <i class="fa-solid fa-list mr-2"></i>選擇其他模式
+                    <button onclick="backToMenu()" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition text-sm">
+                        <i class="fa-solid fa-house mr-1"></i>返回主選單
                     </button>
                 </div>
             </div>
@@ -227,12 +249,6 @@
             <button onclick="closeModal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl">繼續下一題</button>
         </div>
     </div>
-
-    <!-- Top Bar Profile Display -->
-    <div id="user-profile-bar" style="display: flex; align-items: center; gap: 8px;">
-        <span id="display-username"></span>
-        <button id="logout-btn" onclick="logoutUser()" style="display: none;" title="Logout">🚪</button>
-    </div>
     
     <!-- Redesigned Name Input Modal -->
     <div id="name-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center z-50 p-4">
@@ -252,57 +268,7 @@
         </div>
     </div>
     
-    <!-- Unified Result View with Top 10 Leaderboard -->
-    <div id="view-result" class="hidden text-center space-y-6">
-        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-yellow-300 max-w-xl mx-auto">
-            <div class="inline-block p-4 bg-yellow-100 rounded-full text-yellow-500 text-5xl mb-3 bounce-animation">
-                <i class="fa-solid fa-trophy"></i>
-            </div>
-            <h2 class="text-3xl font-extrabold text-gray-800 mb-2">挑戰完成！</h2>
-            <p class="text-gray-600 text-sm mb-6">太棒了！你完成了本次的字詞訓練。</p>
     
-            <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-6">
-                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
-                    <div class="text-xs text-emerald-600 font-semibold">最終得分</div>
-                    <div id="final-score" class="text-3xl font-black text-emerald-700">0</div>
-                </div>
-                <div class="bg-orange-50 p-4 rounded-2xl border border-orange-200">
-                    <div class="text-xs text-orange-600 font-semibold">最高連擊</div>
-                    <div id="final-combo" class="text-3xl font-black text-orange-600">0</div>
-                </div>
-            </div>
-    
-            <!-- Leaderboard Table -->
-            <div class="bg-emerald-50/50 rounded-2xl p-4 border border-emerald-100 mb-6">
-                <h3 class="text-md font-bold text-emerald-800 mb-3 flex items-center justify-center">
-                    <i class="fa-solid fa-ranking-star text-yellow-500 mr-2"></i>前 10 名排行榜 (Top 10)
-                </h3>
-                <div class="overflow-hidden rounded-xl border border-emerald-200 bg-white shadow-sm">
-                    <table class="w-full text-sm text-left text-gray-600">
-                        <thead class="text-xs text-emerald-800 uppercase bg-emerald-100 border-b border-emerald-200">
-                            <tr>
-                                <th class="px-4 py-2 text-center">排名</th>
-                                <th class="px-4 py-2">玩家名稱</th>
-                                <th class="px-4 py-2 text-right">得分</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body" class="divide-y divide-gray-100 font-medium">
-                            <!-- Dynamic rows inserted here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-    
-            <div class="flex justify-center space-x-3">
-                <button onclick="restartGame()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-md transition text-sm">
-                    <i class="fa-solid fa-rotate-right mr-1"></i>再玩一次
-                </button>
-                <button onclick="backToMenu()" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition text-sm">
-                    <i class="fa-solid fa-house mr-1"></i>返回主選單
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Game Logic JavaScript -->
     <script>
