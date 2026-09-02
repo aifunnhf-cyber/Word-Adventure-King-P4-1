@@ -67,7 +67,7 @@
                 <i class="fa-solid fa-graduation-cap text-3xl text-yellow-300"></i>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold">字詞冒險王</h1>
-                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習 1 V2.01</p>
+                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習 1 V2.02</p>
                 </div>
             </div>
             <div id="stats-bar" class="hidden flex items-center space-x-4 bg-emerald-700 px-3 py-1.5 rounded-full text-sm font-semibold">
@@ -79,6 +79,15 @@
 
     <!-- Main Content Container -->
     <main class="max-w-4xl mx-auto w-full p-4 flex-grow flex flex-col justify-center">
+        <div id="user-profile-bar" class="flex items-center space-x-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-emerald-100">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-user-circle text-emerald-600 text-lg"></i>
+                <span id="display-username" class="font-bold text-gray-700 text-sm">訪客</span>
+            </div>
+            <button onclick="logoutUser()" title="登出 / 更改名字" class="text-gray-400 hover:text-red-500 transition p-1">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
 
         <!-- 1. Menu View -->
         <div id="view-menu" class="space-y-6 text-center">
@@ -486,15 +495,9 @@
         
         function updateProfileUI() {
             const savedName = localStorage.getItem('game_username');
-            const displaySpan = document.getElementById('display-username');
-            const logoutBtn = document.getElementById('logout-btn');
-        
-            if (savedName) {
-                displaySpan.innerText = savedName;
-                logoutBtn.style.display = 'inline-block';
-            } else {
-                displaySpan.innerText = "無名氏/anonymous";
-                logoutBtn.style.display = 'none';
+            const displayEl = document.getElementById('display-username');
+            if (displayEl) {
+                displayEl.textContent = savedName || '訪客';
             }
         }
         
@@ -533,6 +536,9 @@
         function logoutUser() {
             localStorage.removeItem('game_username');
             updateProfileUI();
+            promptNameInput(() => {
+                updateProfileUI();    
+            });
         }
 
         // Start Game Engine
@@ -822,6 +828,32 @@
                 spread: 70,
                 origin: { y: 0.6 }
             });
+        }
+
+        function triggerGameOver(score, combo) {
+            // Hide game screen or other active views
+            const gameScreen = document.getElementById('game-screen');
+            if (gameScreen) gameScreen.classList.add('hidden');
+            
+            const menuView = document.getElementById('view-menu');
+            if (menuView) menuView.classList.add('hidden');
+        
+            // Show result view
+            const resultView = document.getElementById('view-result');
+            if (resultView) {
+                resultView.classList.remove('hidden');
+            }
+        
+            // Update final score and combo text elements
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-combo').textContent = combo;
+        
+            // Fetch and render the top 10 leaderboard
+            fetchLeaderboard();
+        
+            // Save the record to Firebase
+            const username = localStorage.getItem('game_username') || '訪客';
+            saveScoreToFirebase(username, score, combo);
         }
 
         function saveScoreToFirebase() {
