@@ -4,12 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>保良局何壽南小學 - 四年級中文字詞冒險王</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Canvas Confetti for Celebration -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Firebase SDK Setup -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+      import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBXpYJyPkH7DoFdDw62qzhKLcAdtpnZNwA",
+        authDomain: "word-adventure-king-p4-1.firebaseapp.com",
+        databaseURL: "https://word-adventure-king-p4-1-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "word-adventure-king-p4-1",
+        storageBucket: "word-adventure-king-p4-1.firebasestorage.app",
+        messagingSenderId: "921235366079",
+        appId: "1:921235366079:web:37906fe89ff1916e9f660a",
+        measurementId: "G-G05KMLZBKT"
+      };
+
+      // Initialize Firebase & expose services globally
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const database = getDatabase(app);
+
+      window.firebaseApp = app;
+      window.firebaseAnalytics = analytics;
+      window.firebaseDatabase = database;
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap');
         body {
@@ -302,7 +331,7 @@
             { word: "性格", lesson: "U7L21", pinyin: "xìng gé", def: "人的性情脾氣。", sentence: "他的＿＿非常開朗，很容易與人相處。" },
             { word: "一心一意", lesson: "U7L21", pinyin: "yī xīn yī yì", def: "心思專一，毫無雜念。", sentence: "做事要＿＿，才能把事情做好。" },
 
-            // 第七單元 第二十三課《弟子規——冬則溫》
+            // 第七單元 第二薪課《弟子規——冬則溫》
             { word: "感覺", lesson: "U7L23", pinyin: "gǎn jué", def: "器官對客觀事物的反應，或心中感受。", sentence: "洗完熱水澡後，我覺得＿＿非常舒服。" },
             { word: "悶熱", lesson: "U7L23", pinyin: "mēn rè", def: "天氣氣溫高，空氣不流通。", sentence: "夏天下雨前，天氣總是特別＿＿。" },
             { word: "涼快", lesson: "U7L23", pinyin: "liáng kuai", def: "清涼舒適。", sentence: "樹蔭下非常＿＿，是消暑的好地方。" },
