@@ -218,6 +218,51 @@
         </div>
     </div>
 
+    <!-- Top Bar Profile Display -->
+    <div id="user-profile-bar" style="display: flex; align-items: center; gap: 8px;">
+        <span id="display-username"></span>
+        <button id="logout-btn" onclick="logoutUser()" style="display: none;" title="Logout">🚪</button>
+    </div>
+    
+    <!-- Name Input Modal (shown before starting game if name isn't set) -->
+    <div id="name-modal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:20px; border-radius:8px; text-align:center;">
+            <h3>Enter Your Name</h3>
+            <input type="text" id="username-input" placeholder="Your name..." style="padding:8px; width:80%;">
+            <br><br>
+            <button onclick="saveUsername()">Save & Start</button>
+            <button onclick="skipUsername()">Skip</button>
+        </div>
+    </div>
+    
+    <!-- Update your Result View to include Leaderboard & Action Buttons -->
+    <div id="view-result" class="view" style="display:none;">
+        <h2>Game Over!</h2>
+        <p>Score: <span id="final-score">0</span></p>
+        <p>Max Combo: <span id="final-combo">0</span></p>
+    
+        <!-- Leaderboard Table -->
+        <h3>Top 100 Scores</h3>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table id="leaderboard-table" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+    
+        <!-- Action Buttons -->
+        <div style="margin-top: 20px;">
+            <button onclick="restartGame()">Play Again</button>
+            <button onclick="quitGame()">Quit</button>
+        </div>
+    </div>
+
     <!-- Game Logic JavaScript -->
     <script>
         // Full Word Database mapped from user provided photos
@@ -399,23 +444,82 @@
             }
         }
 
+        // On Page Load: Setup Player Name
+        document.addEventListener("DOMContentLoaded", () => {
+            updateProfileUI();
+        });
+        
+        function getSavedUsername() {
+            return localStorage.getItem('game_username') || "無名氏/anonymous";
+        }
+        
+        function updateProfileUI() {
+            const savedName = localStorage.getItem('game_username');
+            const displaySpan = document.getElementById('display-username');
+            const logoutBtn = document.getElementById('logout-btn');
+        
+            if (savedName) {
+                displaySpan.innerText = savedName;
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                displaySpan.innerText = "無名氏/anonymous";
+                logoutBtn.style.display = 'none';
+            }
+        }
+        
+        function promptNameInput(onComplete) {
+            const savedName = localStorage.getItem('game_username');
+            if (!savedName) {
+                const modal = document.getElementById('name-modal');
+                modal.style.display = 'flex';
+                window.onNameSubmitted = onComplete;
+            } else {
+                onComplete();
+            }
+        }
+        
+        function saveUsername() {
+            const inputVal = document.getElementById('username-input').value.trim();
+            if (inputVal) {
+                localStorage.setItem('game_username', inputVal);
+            }
+            document.getElementById('name-modal').style.display = 'none';
+            updateProfileUI();
+            if (window.onNameSubmitted) window.onNameSubmitted();
+        }
+        
+        function skipUsername() {
+            document.getElementById('name-modal').style.display = 'none';
+            updateProfileUI();
+            if (window.onNameSubmitted) window.onNameSubmitted();
+        }
+        
+        function logoutUser() {
+            localStorage.removeItem('game_username');
+            updateProfileUI();
+        }
+
         // Start Game Engine
         function startGame(mode) {
-            currentMode = mode;
-            filteredWords = getSelectedWords();
+            promptNameInput(() => {
+                currentMode = mode;
+                filteredWords = getSelectedWords();
+                
+                if (filteredWords.length < 4) {
+                    alert("該課文詞語數量較少，建議選擇『全部課文綜合挑戰』進行遊戲！");
+                    return;
+                }
+    
+                currentGameIndex = 0;
+                score = 0;
+                combo = 0;
+                maxCombo = 0;
+                updateStats();
+                showView('view-game');
+                loadQuestion();
+                showView('view-game');
+            });
             
-            if (filteredWords.length < 4) {
-                alert("該課文詞語數量較少，建議選擇『全部課文綜合挑戰』進行遊戲！");
-                return;
-            }
-
-            currentGameIndex = 0;
-            score = 0;
-            combo = 0;
-            maxCombo = 0;
-            updateStats();
-            showView('view-game');
-            loadQuestion();
         }
 
         function updateStats() {
@@ -672,8 +776,10 @@
             document.getElementById('final-combo').innerText = maxCombo;
             showView('view-result');
             
-            // Save Score to Firebase Realtime Database
+            // Save to Firebase and Fetch Leaderboard
             saveScoreToFirebase();
+            fetchLeaderboard();
+            
             // Celebration Confetti
             confetti({
                 particleCount: 100,
@@ -684,23 +790,56 @@
 
         function saveScoreToFirebase() {
             if (window.firebaseDatabase) {
-                // Import Realtime Database functions directly from window or ES module
                 import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js")
                     .then(({ ref, push, set }) => {
-                        const selectedLesson = document.getElementById('lesson-select').value;
+                        const selectedLesson = document.getElementById('lesson-select')?.value || 'ALL';
                         const scoresRef = ref(window.firebaseDatabase, 'game_scores');
                         const newScoreRef = push(scoresRef);
                         
                         set(newScoreRef, {
+                            username: getSavedUsername(),
                             score: score,
                             maxCombo: maxCombo,
                             mode: currentMode,
                             lesson: selectedLesson,
                             timestamp: Date.now()
-                        }).then(() => {
-                            console.log("Score saved successfully to Firebase!");
-                        }).catch((error) => {
-                            console.error("Error saving score to Firebase:", error);
+                        });
+                    });
+            }
+        }
+        
+        // Fetch Top 100 Scores
+        function fetchLeaderboard() {
+            if (window.firebaseDatabase) {
+                import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js")
+                    .then(({ ref, query, orderByChild, limitToLast, get }) => {
+                        const scoresRef = ref(window.firebaseDatabase, 'game_scores');
+                        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(100));
+        
+                        get(topScoresQuery).then((snapshot) => {
+                            const leaderboardBody = document.getElementById('leaderboard-body');
+                            leaderboardBody.innerHTML = '';
+        
+                            if (snapshot.exists()) {
+                                const scores = [];
+                                snapshot.forEach((childSnapshot) => {
+                                    scores.push(childSnapshot.val());
+                                });
+        
+                                // Firebase orders ascending by default; reverse for descending rank
+                                scores.sort((a, b) => b.score - a.score);
+        
+                                scores.forEach((entry, index) => {
+                                    const row = `
+                                        <tr>
+                                            <td>${index + 1}</td>
+                                            <td>${entry.username || "無名氏/anonymous"}</td>
+                                            <td>${entry.score}</td>
+                                        </tr>
+                                    `;
+                                    leaderboardBody.insertAdjacentHTML('beforeend', row);
+                                });
+                            }
                         });
                     });
             }
@@ -708,6 +847,10 @@
 
         function restartGame() {
             startGame(currentMode);
+        }
+
+        function quitGame() {
+            showView('view-home'); // Adjust to your initial view container ID
         }
 
         function backToMenu() {
