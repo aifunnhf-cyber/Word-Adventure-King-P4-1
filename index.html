@@ -67,7 +67,7 @@
                 <i class="fa-solid fa-graduation-cap text-3xl text-yellow-300"></i>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold">字詞冒險王</h1>
-                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習 1 V2.0</p>
+                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習 1 V2.01</p>
                 </div>
             </div>
             <div id="stats-bar" class="hidden flex items-center space-x-4 bg-emerald-700 px-3 py-1.5 rounded-full text-sm font-semibold">
@@ -224,42 +224,73 @@
         <button id="logout-btn" onclick="logoutUser()" style="display: none;" title="Logout">🚪</button>
     </div>
     
-    <!-- Name Input Modal (shown before starting game if name isn't set) -->
-    <div id="name-modal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-        <div style="background:#fff; padding:20px; border-radius:8px; text-align:center;">
-            <h3>Enter Your Name</h3>
-            <input type="text" id="username-input" placeholder="Your name..." style="padding:8px; width:80%;">
-            <br><br>
-            <button onclick="saveUsername()">Save & Start</button>
-            <button onclick="skipUsername()">Skip</button>
+    <!-- Redesigned Name Input Modal -->
+    <div id="name-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full text-center shadow-2xl border-4 border-emerald-200 transform transition-all">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 text-2xl">
+                <i class="fa-solid fa-user-pen"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-gray-800 mb-2">輸入你的名字</h3>
+            <p class="text-xs text-gray-500 mb-4">記錄你的精彩成績與排行榜紀錄</p>
+            
+            <input type="text" id="username-input" placeholder="請輸入名字..." class="w-full p-3 border-2 border-emerald-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold text-gray-700 bg-emerald-50 text-center mb-4">
+            
+            <div class="flex space-x-3">
+                <button onclick="saveUsername()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition">儲存並開始</button>
+                <button onclick="skipUsername()" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition">略過</button>
+            </div>
         </div>
     </div>
     
-    <!-- Update your Result View to include Leaderboard & Action Buttons -->
-    <div id="view-result" class="view" style="display:none;">
-        <h2>Game Over!</h2>
-        <p>Score: <span id="final-score">0</span></p>
-        <p>Max Combo: <span id="final-combo">0</span></p>
+    <!-- Unified Result View with Top 10 Leaderboard -->
+    <div id="view-result" class="hidden text-center space-y-6">
+        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-yellow-300 max-w-xl mx-auto">
+            <div class="inline-block p-4 bg-yellow-100 rounded-full text-yellow-500 text-5xl mb-3 bounce-animation">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-2">挑戰完成！</h2>
+            <p class="text-gray-600 text-sm mb-6">太棒了！你完成了本次的字詞訓練。</p>
     
-        <!-- Leaderboard Table -->
-        <h3>Top 100 Scores</h3>
-        <div style="max-height: 300px; overflow-y: auto;">
-            <table id="leaderboard-table" style="width:100%; border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Name</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body"></tbody>
-            </table>
-        </div>
+            <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-6">
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                    <div class="text-xs text-emerald-600 font-semibold">最終得分</div>
+                    <div id="final-score" class="text-3xl font-black text-emerald-700">0</div>
+                </div>
+                <div class="bg-orange-50 p-4 rounded-2xl border border-orange-200">
+                    <div class="text-xs text-orange-600 font-semibold">最高連擊</div>
+                    <div id="final-combo" class="text-3xl font-black text-orange-600">0</div>
+                </div>
+            </div>
     
-        <!-- Action Buttons -->
-        <div style="margin-top: 20px;">
-            <button onclick="restartGame()">Play Again</button>
-            <button onclick="quitGame()">Quit</button>
+            <!-- Leaderboard Table -->
+            <div class="bg-emerald-50/50 rounded-2xl p-4 border border-emerald-100 mb-6">
+                <h3 class="text-md font-bold text-emerald-800 mb-3 flex items-center justify-center">
+                    <i class="fa-solid fa-ranking-star text-yellow-500 mr-2"></i>前 10 名排行榜 (Top 10)
+                </h3>
+                <div class="overflow-hidden rounded-xl border border-emerald-200 bg-white shadow-sm">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-emerald-800 uppercase bg-emerald-100 border-b border-emerald-200">
+                            <tr>
+                                <th class="px-4 py-2 text-center">排名</th>
+                                <th class="px-4 py-2">玩家名稱</th>
+                                <th class="px-4 py-2 text-right">得分</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body" class="divide-y divide-gray-100 font-medium">
+                            <!-- Dynamic rows inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    
+            <div class="flex justify-center space-x-3">
+                <button onclick="restartGame()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-md transition text-sm">
+                    <i class="fa-solid fa-rotate-right mr-1"></i>再玩一次
+                </button>
+                <button onclick="backToMenu()" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition text-sm">
+                    <i class="fa-solid fa-house mr-1"></i>返回主選單
+                </button>
+            </div>
         </div>
     </div>
 
@@ -471,7 +502,8 @@
             const savedName = localStorage.getItem('game_username');
             if (!savedName) {
                 const modal = document.getElementById('name-modal');
-                modal.style.display = 'flex';
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
                 window.onNameSubmitted = onComplete;
             } else {
                 onComplete();
@@ -483,13 +515,17 @@
             if (inputVal) {
                 localStorage.setItem('game_username', inputVal);
             }
-            document.getElementById('name-modal').style.display = 'none';
+            const modal = document.getElementById('name-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
             updateProfileUI();
             if (window.onNameSubmitted) window.onNameSubmitted();
         }
         
         function skipUsername() {
-            document.getElementById('name-modal').style.display = 'none';
+            const modal = document.getElementById('name-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
             updateProfileUI();
             if (window.onNameSubmitted) window.onNameSubmitted();
         }
@@ -809,12 +845,13 @@
         }
         
         // Fetch Top 100 Scores
-        function fetchLeaderboard() {
+       function fetchLeaderboard() {
             if (window.firebaseDatabase) {
                 import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js")
                     .then(({ ref, query, orderByChild, limitToLast, get }) => {
                         const scoresRef = ref(window.firebaseDatabase, 'game_scores');
-                        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(100));
+                        // Fetch top 10 scores
+                        const topScoresQuery = query(scoresRef, orderByChild('score'), limitToLast(10));
         
                         get(topScoresQuery).then((snapshot) => {
                             const leaderboardBody = document.getElementById('leaderboard-body');
@@ -826,19 +863,22 @@
                                     scores.push(childSnapshot.val());
                                 });
         
-                                // Firebase orders ascending by default; reverse for descending rank
+                                // Sort descending for display
                                 scores.sort((a, b) => b.score - a.score);
         
                                 scores.forEach((entry, index) => {
+                                    const rankBadge = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1;
                                     const row = `
-                                        <tr>
-                                            <td>${index + 1}</td>
-                                            <td>${entry.username || "無名氏/anonymous"}</td>
-                                            <td>${entry.score}</td>
+                                        <tr class="hover:bg-emerald-50/50 transition">
+                                            <td class="px-4 py-2 text-center font-bold">${rankBadge}</td>
+                                            <td class="px-4 py-2 text-gray-800">${entry.username || "無名氏"}</td>
+                                            <td class="px-4 py-2 text-right font-black text-emerald-600">${entry.score}</td>
                                         </tr>
                                     `;
                                     leaderboardBody.insertAdjacentHTML('beforeend', row);
                                 });
+                            } else {
+                                leaderboardBody.innerHTML = `<tr><td colspan="3" class="px-4 py-3 text-center text-gray-400">暫無紀錄</td></tr>`;
                             }
                         });
                     });
