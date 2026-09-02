@@ -67,30 +67,31 @@
                 <i class="fa-solid fa-graduation-cap text-3xl text-yellow-300"></i>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold">字詞冒險王</h1>
-                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習 1 V2.02</p>
+                    <p class="text-xs text-emerald-100">保良局何壽南小學 四年級字詞學習 1 V2.04</p>
                 </div>
             </div>
             <div id="stats-bar" class="hidden flex items-center space-x-4 bg-emerald-700 px-3 py-1.5 rounded-full text-sm font-semibold">
                 <span id="score-display" class="text-yellow-300"><i class="fa-solid fa-star mr-1"></i>0</span>
                 <span id="combo-display" class="text-orange-300"><i class="fa-solid fa-fire mr-1"></i>0 連擊</span>
             </div>
+            <div id="user-profile-bar" class="flex items-center space-x-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-emerald-100">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-user-circle text-emerald-600 text-lg"></i>
+                    <span id="display-username" class="font-bold text-gray-700 text-sm">訪客</span>
+                </div>
+                <button onclick="logoutUser()" title="登出 / 更改名字" class="text-gray-400 hover:text-red-500 transition p-1">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
         </div>
     </header>
 
     <!-- Main Content Container -->
     <main class="max-w-4xl mx-auto w-full p-4 flex-grow flex flex-col justify-center">
-        <div id="user-profile-bar" class="flex items-center space-x-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-emerald-100">
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-user-circle text-emerald-600 text-lg"></i>
-                <span id="display-username" class="font-bold text-gray-700 text-sm">訪客</span>
-            </div>
-            <button onclick="logoutUser()" title="登出 / 更改名字" class="text-gray-400 hover:text-red-500 transition p-1">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
-        </div>
+        
 
         <!-- 1. Menu View -->
-        <div id="view-menu" class="space-y-6 text-center">
+        <div id="view-menu" class="space-y-6 text-center">       
             <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-emerald-200">
                 <h2 class="text-2xl md:text-3xl font-extrabold text-emerald-700 mb-2">歡迎來到字詞大冒險！</h2>
                 <p class="text-gray-600 mb-6">請選擇課文與遊戲模式開始練習：</p>
@@ -417,7 +418,7 @@
             { word: "一心一意", lesson: "U7L21", pinyin: "yī xīn yī yì", def: "心思專一，毫無雜念。", sentence: "做事要＿＿，才能把事情做好。" },
 
             // 第七單元 第二薪課《弟子規——冬則溫》
-            { word: "感覺", lesson: "U7L23", pinyin: "gǎn jué", def: "器官對客觀事物的反應，或心中感受。", sentence: "洗完熱水澡後，我覺得＿＿非常舒服。" },
+            { word: "感覺", lesson: "U7L23", pinyin: "gǎn jué", def: "器官對客觀事物的反應，或心中感受。", sentence: "洗完熱水澡後，我＿＿非常舒服。" },
             { word: "悶熱", lesson: "U7L23", pinyin: "mēn rè", def: "天氣氣溫高，空氣不流通。", sentence: "夏天下雨前，天氣總是特別＿＿。" },
             { word: "涼快", lesson: "U7L23", pinyin: "liáng kuai", def: "清涼舒適。", sentence: "樹蔭下非常＿＿，是消暑的好地方。" },
             { word: "安心", lesson: "U7L23", pinyin: "ān xīn", def: "心情安定，沒有顧慮。", sentence: "看到孩子平安無事，媽媽終於＿＿了。" }
