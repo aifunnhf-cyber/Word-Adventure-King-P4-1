@@ -672,12 +672,38 @@
             document.getElementById('final-combo').innerText = maxCombo;
             showView('view-result');
             
+            // Save Score to Firebase Realtime Database
+            saveScoreToFirebase();
             // Celebration Confetti
             confetti({
                 particleCount: 100,
                 spread: 70,
                 origin: { y: 0.6 }
             });
+        }
+
+        function saveScoreToFirebase() {
+            if (window.firebaseDatabase) {
+                // Import Realtime Database functions directly from window or ES module
+                import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js")
+                    .then(({ ref, push, set }) => {
+                        const selectedLesson = document.getElementById('lesson-select').value;
+                        const scoresRef = ref(window.firebaseDatabase, 'game_scores');
+                        const newScoreRef = push(scoresRef);
+                        
+                        set(newScoreRef, {
+                            score: score,
+                            maxCombo: maxCombo,
+                            mode: currentMode,
+                            lesson: selectedLesson,
+                            timestamp: Date.now()
+                        }).then(() => {
+                            console.log("Score saved successfully to Firebase!");
+                        }).catch((error) => {
+                            console.error("Error saving score to Firebase:", error);
+                        });
+                    });
+            }
         }
 
         function restartGame() {
